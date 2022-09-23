@@ -1,0 +1,20 @@
+host: ""
+enable-http: true
+port-http: 80
+enable-https: true
+port-https: 443
+crt-file: "./cert/server.crt"
+key-file: "./cert/server.key"
+content: "ok"
+content-file: "./content/example.txt"
+content-type: "text/html; charset=UTF-8"
+enable-tcp: true
+port-tcp: 0
+enable-udp: true
+port-udp: 0
+enable-log : true
+log-dir: "./log"
+log-requests: true
+log-connections: true
+log-packets: true
+quiet: false
