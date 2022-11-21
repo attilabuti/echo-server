@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 type appServer struct {
@@ -66,23 +67,25 @@ func (s *appServer) start() {
 		}()
 	}
 
-	sigint := make(chan os.Signal, 1)
-	go func() {
-		signal.Notify(sigint, os.Interrupt)
-		<-sigint
-		s.stop()
-	}()
+	go s.close()
 
 	log.error.Println(<-s.errors)
 
 	<-s.idle
 }
 
+func (s *appServer) close() {
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	<-sigint
+	s.stop()
+}
+
 func (s *appServer) stop() {
 	if config.http.enabled {
 		if err := s.http.Shutdown(context.Background()); err != nil {
 			// Error from closing listeners, or context timeout:
-			log.error.Printf("HTTP server shutdown: %v\n", err)
+			log.error.Printf("HTTP server shutdown error: %v\n", err)
 		} else {
 			log.info.Println("HTTP server shutdown")
 		}
@@ -91,7 +94,7 @@ func (s *appServer) stop() {
 	if config.https.enabled {
 		if err := s.https.Shutdown(context.Background()); err != nil {
 			// Error from closing listeners, or context timeout:
-			log.error.Printf("HTTPS server shutdown: %v\n", err)
+			log.error.Printf("HTTPS server shutdown error: %v\n", err)
 		} else {
 			log.info.Println("HTTPS server shutdown")
 		}
@@ -125,9 +128,7 @@ func (s *appServer) stop() {
 		}
 	}
 
-	if config.log.enabled {
-		log.close()
-	}
+	log.close()
 
 	close(s.errors)
 	close(s.idle)

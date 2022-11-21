@@ -206,6 +206,11 @@ func init() {
 		Flags:                 flags,
 		CustomAppHelpTemplate: helpTemplate,
 		Action: func(cCtx *cli.Context) error {
+			if len(os.Args) < 2 {
+				cli.ShowAppHelp(cCtx)
+				os.Exit(0)
+			}
+
 			if !cCtx.Bool("help") && !cCtx.Bool("version") {
 				if err := config.init(); err != nil {
 					return err

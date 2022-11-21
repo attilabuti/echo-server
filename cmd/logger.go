@@ -70,12 +70,17 @@ func (l *logger) init() error {
 	l.connLogger = _log.New(output, "[connection] ", flags)
 	l.packetLogger = _log.New(output, "[packet] ", flags)
 
+	// TODO a disabled log elemeket már itt árakni IO discard-ra és utána nyugodtan lehet használni
+	// TODO akárcsak a https-proxy esetében
+
 	return nil
 }
 
 func (l *logger) close() {
-	if err := l.file.Close(); err != nil {
-		fmt.Printf("error while closing log file: %v\n", err)
+	if l.file != nil {
+		if err := l.file.Close(); err != nil {
+			fmt.Printf("error while closing log file: %v\n", err)
+		}
 	}
 }
 
